@@ -1,0 +1,851 @@
+LAB 1)
+
+Simple launcher activity manifest.xml
+
+<application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+//pt permisiuni de servicii interne telefonului
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission
+        android:name="android.permission.READ_CONTACTS" />
+    <uses-permission
+        android:name="android.permission.WRITE_CONTACTS" />
+
+//filtru de intentii pentru ca o activitate sa fie pornita doar prin intentie
+<intent-filter>
+    <action android:name="ro.pub.cs.systems.eim.lab04.contactsmanager.intent.action.ContactsManagerActivity" />
+
+    <category android:name="android.intent.category.DEFAULT" />
+</intent-filter>
+
+// modul de aplicatie pt un serviciu
+<application ...>
+	<service
+	  android:name="ro.pub.cs.systems.eim.lab05.SomeService"
+	  android:enabled="true"
+	  android:exported="true"
+	  android:permission="ro.pub.cs.systems.eim.lab05.SOME_SERVICE_PERMISSION" />
+</application>		
+
+
+LAYOUT:
+
+<ImageView
+        android:id="@+id/icon_image_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:contentDescription="@string/icon_image_view_content_description"
+        android:src="@mipmap/ic_launcher" />
+
+<TextView
+        android:id="@+id/introduce_yourself_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/introduce_yourself_text_view_content" />
+
+<EditText
+        android:id="@+id/password_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:ems="10"
+        android:inputType="textPassword"
+        android:hint="@string/password"
+        android:layout_weight="1"
+        android:saveEnabled="false"/> //daca nu se doreste salvarea starii
+
+<CheckBox
+    android:id="@+id/remember_me_checkbox"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/remember_me_checkbox"
+    android:saveEnabled="false"/> 
+
+
+<Button
+        android:id="@+id/submit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|top"
+        android:text="@string/submit_button_content" />
+
+//fortare sa nu se salveze starea unui camp
+EditText
+    android:id="@+id/left_edit_text"
+    android:saveEnabled="false"
+    ... />
+
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="horizontal">
+
+    <Button/>
+
+    <Space/>
+    	...
+    <Button/>
+
+</LinearLayout>
+
+
+//GRID
+
+<GridLayout
+
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:rowCount="8"
+	android:columnCount="3"
+	android:layout_gravity="center">
+
+	<Button
+		android:id="@+id/number_1_button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_row="2"
+		android:layout_column="0"
+		android:text="@string/number_1"/>
+
+	<ImageButton
+		android:id="@+id/backspace_image_button"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:src="@drawable/backspace"
+		android:background="@null"
+		android:layout_row="0"
+		android:layout_column="2"
+		android:layout_gravity="center"/>
+</GridLayout>
+
+
+
+
+
+
+CODE:
+
+-first override onCreate to show a layout
+
+@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState); //parinte; instanta salvata
+        setContentView(R.layout.activity_main); //activity_main se inlocuieste cu numele layoutului
+
+        Button submitButton = (Button)findViewById(R.id.submit_button); //instatiere buton pt ascultare actiune
+        submitButton.setOnClickListener(buttonClickListener); //se leaga butonul la ascultatorul lui pt actiune
+    }
+
+//se creeaza o clasa privata interna clasei principale ce reprezinta clasa ascultatoare pe buton
+    private class ButtonClickListener implements Button.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+        	//instantiere de campuri text pt a lua informatii
+            EditText userNameEditText = (EditText)findViewById(R.id.user_name_edit_text);
+            TextView greetingTextView = (TextView)findViewById(R.id.greeting_text_view);
+            greetingTextView.setAlpha(1);
+
+            // TODO: exercise 9a
+            greetingTextView.setText(greetingTextView.getText().toString().replace("xxx", "\n"+userNameEditText.getText()));
+
+            //verificare ce buton este
+            if (((Button)view).getText().toString().equals(getResources().getString(R.string.cancel_button_content))) {
+                usernameEditText.setText(getResources().getText(R.string.empty));
+                passwordEditText.setText(getResources().getText(R.string.empty));
+            }
+        }//rezultat la aparasare buton se executa metoda onclick
+
+    }
+
+
+// se creaza ascultatorul pe buton ca si camp al clasei principale
+private ButtonClickListener buttonClickListener = new ButtonClickListener();
+
+//instanta de listener pt un buton cu mostenire generica (de la view)
+
+private class GenericButtonClickListener implements View.OnClickListener {
+    @Override
+    public void onClick(View view) {
+    	//add some text from the button
+        phoneNumberEditText.setText(phoneNumberEditText.getText().toString() + ((Button)view).getText().toString());
+    }
+}
+private GenericButtonClickListener genericButtonClickListener = new GenericButtonClickListener();
+
+
+!!!SaveInstanceState
+
+// metode folosite pentru salvarea si restaurarea starii    
+
+@Override
+protected void onSaveInstanceState(Bundle savedInstanceState) {
+// apelarea metodei din activitatea parinte este recomandata, dar nu obligatorie
+super.onSaveInstanceState(savedInstanceState);
+// salvare de exemplu a unui edittext field
+EditText usernameEditText = (EditText)findViewById(R.id.username_edit_text);
+savedInstanceState.putString(Constants.USERNAME_EDIT_TEXT, usernameEditText.getText().toString());
+}
+1)restaurare in ovCreate
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+  super.onCreate(savedInstanceState);
+  setContentView(R.layout.activity_lifecycle_monitor);
+  EditText usernameEditText = (EditText)findViewById(R.id.username_edit_text);
+  if ((savedInstanceState != null) && (savedInstanceState.getString(Constants.USERNAME_EDIT_TEXT) != null)) {
+    usernameEditText.setText(bundle.getString(Constants.USERNAME_EDIT_TEXT));
+  }
+
+
+  //varificare daca e instanta de resetrat si cautare dupa cheie
+  if (savedInstanceState == null) {
+	    Log.d(Constants.TAG, "onCreate() method was invoked without a previous state");
+	} else {
+	    Log.d(Constants.TAG, "onCreate() method was invoked with a previous state");
+	    if (savedInstanceState.containsKey(Constants.USERNAME_EDIT_TEXT)) {
+	        EditText usernameEditText = (EditText)findViewById(R.id.username_edit_text);
+	        usernameEditText.setText(savedInstanceState.getString(Constants.USERNAME_EDIT_TEXT));
+	    }
+	    if (savedInstanceState.containsKey(Constants.REMEMBER_ME_CHECKBOX)) {
+            CheckBox rememberMeCheckbox = (CheckBox)findViewById(R.id.remember_me_checkbox);
+            rememberMeCheckbox.setChecked(savedInstanceState.getBoolean(Constants.REMEMBER_ME_CHECKBOX));
+        }
+	}
+}
+
+2)restaurare in onRestoreInstanceState
+@Override
+protected void onRestoreInstanceState(Bundle savedInstanceState) {
+// apelarea metodei din activitatea parinte este recomandata, dar nu obligatorie
+super.onRestoreInstanceState(savedInstanceState);
+EditText usernameEditText= (EditText)findViewById(R.id.username_edit_text);
+  if (savedInstanceState.getString(Constants.USERNAME_EDIT_TEXT) != null) {
+      usernameEditText.setText(savedInstanceState.getString(Constants.USERNAME_EDIT_TEXT));
+  }
+}
+
+
+!!!Suprascriere stari aplicatii in afara de onCreate
+
+@Override
+public void onRestart() {
+    super.onRestart();
+    Log.d(Constants.TAG, "onRestart() method was invoked");
+}
+
+@Override
+public void onStart() {
+    super.onStart();
+    Log.d(Constants.TAG, "onStart() method was invoked");
+}
+
+@Override
+public void onResume() {
+    super.onResume();
+    Log.d(Constants.TAG, "onResume() method was invoked");
+}
+
+@Override
+public void onPause() {
+    super.onPause();
+    Log.d(Constants.TAG, "onPause() method was invoked");
+}
+
+@Override
+public void onStop() {
+    super.onStop();
+    Log.d(Constants.TAG, "onStop() method was invoked");
+}
+
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    Log.d(Constants.TAG, "onDestroy() method was invoked");
+}
+
+//blocare layout landscape (doar portret)
+setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); //in onCreate
+
+!!!!!//INTENTII
+
+1. intentie de trimis nr telefon catre apel
+private class CallImageButtonClickListener implements View.OnClickListener {
+    @Override
+    public void onClick(View view) {
+        if (ContextCompat.checkSelfPermission(PhoneDialerActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    PhoneDialerActivity.this,
+                    new String[]{Manifest.permission.CALL_PHONE},
+                    Constants.PERMISSION_REQUEST_CALL_PHONE);
+        } else {
+            Intent intent = new Intent(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + phoneNumberEditText.getText().toString()));
+            startActivity(intent);
+        }
+    }
+}
+//la apasarea butonului se trimire intentia
+private CallImageButtonClickListener callImageButtonClickListener = new CallImageButtonClickListener();
+
+
+//Tipuri clasice de intentii
+Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setData(Uri.parse("http://ocw.cs.pub.ro/eim"));
+
+Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+intent.setData(Uri.parse("http://www.google.ro"));
+
+Intent intent = new Intent(Intent.ACTION_DIAL);
+
+Intent intent = new Intent(Intent.ACTION_CALL);
+intent.setData(Uri.parse("tel:0214029466"));
+
+
+//actiuni aplicatie chemata de intentie
+@Override
+protected void onCreate(Bundle state) {
+  super.onCreate(state);
+  setContentView(R.layout.activity_main);
+  Intent intent = getIntent();
+  if (intent != null) {
+    String action = intent.getAction();
+    Uri data = intent.getData();
+    Bundle extras = intent.getExtras();
+  }
+}
+
+//intentii noi
+@Override
+public void onNewIntent(Intent newIntent) {
+  super.onNewIntent(newIntent);
+  // ...
+}
+
+//intentii inlantuite
+Intent intent = getIntent();
+if (intent != null) {
+  startNextMatchingActivity(intent);
+}
+
+
+!!!//intentii cu returnare valori
+//CLASA PARINTE
+final private static int ANOTHER_ACTIVITY_REQUEST_CODE = 2017;
+ 
+@Override
+protected void onCreate(Bundle state) {
+  super.onCreate(state);
+  setContentView(R.layout.activity_main);
+  Intent intent = new Intent("ro.pub.cs.systems.eim.lab04.AnotherActivity");
+  intent.putExtra("ro.pub.cs.systems.eim.eim.someKey", someValue);
+  startActivityForResult(intent, ANOTHER_ACTIVITY_REQUEST_CODE);
+  // start another activities with their own request codes
+}
+ 
+public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+  switch(requestCode) {
+    case ANOTHER_ACTIVITY_REQUEST_CODE:
+      if (resultCode == Activity.RESULT_OK) {
+        Bundle data = intent.getExtras();
+        // process information from data ...
+      }
+      break;
+ 
+      // process other request codes
+  }
+}
+
+//sau activity eresult co TOAST
+public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        switch(resultCode) {
+            case RESULT_OK:
+                Toast.makeText(this, getResources().getString(R.string.ok_rez), Toast.LENGTH_LONG).show();
+
+                break;
+            case RESULT_CANCELED:
+                Toast.makeText(this, getResources().getString(R.string.cancel_rez), Toast.LENGTH_LONG).show();
+
+                break;
+
+            // process other request codes
+        }
+    }
+
+//CLASA COPIL
+@Override
+protected void onCreate(Bundle state) {
+  super.onCreate(state);
+  setContentView(R.layout.activity_another);
+ 
+  // intent from parent
+  Intent intentFromParent = getIntent();
+  Bundle data = intentFromParent.getExtras();
+
+  // process information from data ...
+  if (intent != null) {
+        String phone = intent.getStringExtra("ro.pub.cs.systems.eim.lab04.contactsmanager.PHONE_NUMBER_KEY");
+        if (phone != null) {
+            phoneEditText.setText(phone);
+        } else {
+            Toast.makeText(this, getResources().getString(R.string.phone_error), Toast.LENGTH_LONG).show();
+        }
+    }
+ 
+  // intent to parent
+  Intent intentToParent = new Intent();
+  intent.putExtra("ro.pub.cs.systems.eim.lab04.anotherKey", anotherValue);
+  setResult(RESULT_OK, intentToParent);
+  finish();
+}
+
+
+!!!//listener on buttons with acctions and intents
+private class ButtonClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+        	//choose the button
+            switch (view.getId()) {
+                case R.id.show_hide_additional_fields:
+                //handle the visibility of a liniarLayout
+                    switch (additionalFieldsContainer.getVisibility()) {
+                        case View.VISIBLE:
+                            showHideAdditionalFieldsButton.setText(getResources().getString(R.string.show_additional_fields));
+                            additionalFieldsContainer.setVisibility(View.INVISIBLE);
+                            break;
+                        case View.INVISIBLE:
+                            showHideAdditionalFieldsButton.setText(getResources().getString(R.string.hide_additional_fields));
+                            additionalFieldsContainer.setVisibility(View.VISIBLE);
+                            break;
+                    }
+                    break;
+                case R.id.save_button:
+                    String name = nameEditText.getText().toString();
+                    String phone = phoneEditText.getText().toString();
+                    String email = emailEditText.getText().toString();
+                    String address = addressEditText.getText().toString();
+                    String jobTitle = jobTitleEditText.getText().toString();
+                    String company = companyEditText.getText().toString();
+                    String website = websiteEditText.getText().toString();
+                    String im = imEditText.getText().toString();
+
+                    Intent intent = new Intent(ContactsContract.Intents.Insert.ACTION);
+                    intent.setType(ContactsContract.RawContacts.CONTENT_TYPE);
+                    if (name != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+                    }
+                    if (phone != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.PHONE, phone);
+                    }
+                    if (email != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.EMAIL, email);
+                    }
+                    if (address != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.POSTAL, address);
+                    }
+                    if (jobTitle != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.JOB_TITLE, jobTitle);
+                    }
+                    if (company != null) {
+                        intent.putExtra(ContactsContract.Intents.Insert.COMPANY, company);
+                    }
+                    ArrayList<ContentValues> contactData = new ArrayList<>();
+                    if (website != null) {
+                        ContentValues websiteRow = new ContentValues();
+                        websiteRow.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Website.CONTENT_ITEM_TYPE);
+                        websiteRow.put(ContactsContract.CommonDataKinds.Website.URL, website);
+                        contactData.add(websiteRow);
+                    }
+                    if (im != null) {
+                        ContentValues imRow = new ContentValues();
+                        imRow.put(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Im.CONTENT_ITEM_TYPE);
+                        imRow.put(ContactsContract.CommonDataKinds.Im.DATA, im);
+                        contactData.add(imRow);
+                    }
+                    intent.putParcelableArrayListExtra(ContactsContract.Intents.Insert.DATA, contactData);
+                    startActivityForResult(intent, Constants.CONTACTS_MANAGER_REQUEST_CODE);
+                    break;
+                case R.id.cancel_button:
+                    setResult(Activity.RESULT_CANCELED, new Intent());
+                    finish();
+                    break;
+            }
+        }
+
+    }
+
+
+ //SERVICII
+1) STARTED
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+ 
+public class SomeStartedService extends Service {
+ 
+  private int startMode;
+ 
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    // ...
+  }
+ 
+  @Override
+  public int onStartCommand(Intent intent, 
+                            int flags,
+                            int startId) {
+    // ...
+    return startMode;
+  }
+ 
+  @Override
+  public IBinder onBind(Intent intent) {
+    // ...
+    return null;
+  }
+ 
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    // ...
+  }
+}
+
+
+2) BOUNDED
+import android.app.Service;
+import android.content.Intent;
+import android.os.IBinder;
+ 
+public class SomeBoundedService extends Service {
+ 
+  private IBinder iBinder;
+  private boolean allowRebind;
+ 
+  @Override
+  public void onCreate() {
+    super.onCreate();
+    // ...
+  }
+ 
+  @Override
+  public IBinder onBind(Intent intent) {
+    // ...
+    return iBinder;
+  }
+ 
+  @Override
+  public boolean onUnbind(Intent intent) {
+    // ...
+    return allowRebind;
+  }
+ 
+  @Override
+  public void onRebind(Intent intent) {
+    // ...
+  }
+ 
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    // ...
+  }
+}
+
+
+//pornire serviciu
+
+//de obicei in onCreate
+Intent intent = new Intent(getApplicationContext(), SomeService.class);
+startService(intent);
+
+Intent intent = new Intent();
+intent.setComponent(new ComponentName("SomePackage", "SomeService"));
+startService(intent);
+
+//rulare serviciu pe thread 
+private void executeOnDedicatedThread() {
+  Thread dedicatedThread = new Thread(new Runnable() {
+    @Override
+    public void run() {
+      // ...
+    }
+  });
+  dedicatedThread.start();
+}
+!!!!sau
+
+//rulare serviciu pe un thread 
+ @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(Constants.TAG, "onStartCommand() method was invoked");
+        ProcessingThread processingThread = new ProcessingThread(this);
+        processingThread.start();
+        return START_REDELIVER_INTENT;
+    }
+
+    +++++
+!!!!!!!//CLASA PROCESSING THREAD
+public class ProcessingThread extends Thread { //clasa thread
+ 
+  private Context context = null;
+  private boolean isRunning = true;
+ 
+  public ProcessingThread(Context context) {
+    this.context = context;
+  }
+ 
+  @Override
+  public void run() { //start din onStartCommand ruleaza asta
+    while(true){ 
+      sendMessage(Constants.MESSAGE_STRING); //trimite un mesaj
+      sleep();
+    }
+  }
+ 
+  private void sleep() { //un sleep
+    try {
+      Thread.sleep(Constants.SLEEP_TIME);
+    } catch (InterruptedException interruptedException) {
+      interruptedException.printStackTrace();
+    }
+  }
+ 
+  private void sendMessage(int messageType) { //seteaza pe intentie si trimite broadcast
+    Intent intent = new Intent();
+    switch(messageType) {
+      case Constants.MESSAGE_STRING:
+         intent.setAction(Constants.ACTION_STRING);
+         intent.putExtra(Constants.DATA, Constants.STRING_DATA);
+         break;
+      // ...
+    }
+    context.sendBroadcast(intent);
+  }
+
+  public void stopThread() {
+    isRunning = false;
+  }
+}
+
+==================Broadcast Receiver===============
+
+public class StartedServiceBroadcastReceiver extends BroadcastReceiver {
+	//se supracscrie onReceive
+	    @Override
+    public void onReceive(Context context, Intent intent) {
+        
+        String action = intent.getAction();
+        String data = null;
+        if (Constants.ACTION_STRING.equals(action)) {
+            data = intent.getStringExtra(Constants.DATA);
+        }
+        ...
+        if (messageTextView != null) {
+            messageTextView.setText(messageTextView.getText().toString() + "\n" + data);
+        } 
+
+        //sau afisare in consola a mesajului transmis
+   		Log.d(Constants.BROADCAST_RECEIVER_TAG, intent.getStringExtra(Constants.BROADCAST_RECEIVER_EXTRA));
+
+    }
+
+}
+============INTENT FILTER=================
+!!!!!//intent filter face broadcast receiverul sa stie ce actiuni sa asculte
+
+//in onCreate din activitatea ce porneste setviciul 
+// create an instance of the StartedServiceBroadcastReceiver broadcast receiver
+        startedServiceBroadcastReceiver = new StartedServiceBroadcastReceiver(messageTextView);
+
+// create an instance of an IntentFilter
+// with all available actions contained within the broadcast intents sent by the service
+startedServiceIntentFilter = new IntentFilter();
+startedServiceIntentFilter.addAction(Constants.ACTION_STRING);
+
+
+//suprascriere actiuni stari activitate pentru a atasa/detasa difuzatorul
+@Override
+protected void onResume() {
+    super.onResume();
+
+    // register the broadcast receiver with the corresponding intent filter
+    registerReceiver(startedServiceBroadcastReceiver, startedServiceIntentFilter);
+}
+
+@Override
+protected void onPause() {
+    //  unregister the broadcast receiver
+    unregisterReceiver(startedServiceBroadcastReceiver);
+
+    super.onPause();
+}
+
+//oprire serviciu din onDestroy
+@Override
+protected void onDestroy() {
+    // TODO: exercise 8d - stop the service
+    Intent intent = new Intent();
+    intent.setComponent(new ComponentName("ro.pub.cs.systems.eim.lab05.startedservice", "ro.pub.cs.systems.eim.lab05.startedservice.service.StartedService"));
+    stopService(intent);
+
+    super.onDestroy();
+}
+=========================BOUNDED===================
+//exemplu de serviciu bounded
+public class BoundedService extends Service {
+
+    final private IBinder boundedServiceBinder = new BoundedServiceBinder();
+    final private Random random = new Random();
+
+    // implement a IBinder public class to provide a reference
+    // to the service instance through a getService() public method
+    public class BoundedServiceBinder extends Binder {
+        public BoundedService getService() {
+            return BoundedService.this;
+        }
+    }
+
+    // override the lifecycle callback method and log a message
+    // of the moment they are invoked
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(Constants.TAG, "onCreate() method was invoked");
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(Constants.TAG, "onBind() method was invoked");
+        return boundedServiceBinder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(Constants.TAG, "onUnbind() method was invoked");
+        return super.onUnbind(intent);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(Constants.TAG, "onDestroy() method was invoked");
+        super.onDestroy();
+    }
+
+    public String getMessage() {
+        // return a random value from the Constants.MESSAGES array list
+        return Constants.MESSAGES.get(random.nextInt(Constants.MESSAGES.size()));
+    }
+
+}
+
+//exemplu de activitate ce foloseste un serviciu bonded
+public class BoundedServiceActivity extends AppCompatActivity {
+
+    public TextView messageFromServiceTextView;
+    public Button getMessageFromServiceButton;
+
+    private BoundedService boundedService;
+    private int boundedServiceStatus = Constants.SERVICE_STATUS_UNBOUND;
+
+    //  implement a button click listener for getMessageFromServiceButton
+    private GetMessageFromServiceButtonListener getMessageFromServiceButtonListener = new GetMessageFromServiceButtonListener();
+    private class GetMessageFromServiceButtonListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            if (boundedService != null && boundedServiceStatus == Constants.SERVICE_STATUS_BOUND) {
+                messageFromServiceTextView.setText("[" + new Timestamp(System.currentTimeMillis()) + "] " + boundedService.getMessage() + "\n" + messageFromServiceTextView.getText());
+            }
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_bounded_service);
+
+        messageFromServiceTextView = (TextView)findViewById(R.id.message_from_service_text_view);
+        getMessageFromServiceButton = (Button)findViewById(R.id.get_message_from_service_button);
+
+        //  set an instance of the button click listener to handle click events
+        // for getMessageFromServiceButton
+        getMessageFromServiceButton.setOnClickListener(getMessageFromServiceButtonListener);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // bind the service through an intent
+        Intent intent = new Intent(this, BoundedService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected  void onStop() {
+        // unbind the service
+        if (boundedServiceStatus == Constants.SERVICE_STATUS_BOUND) {
+            unbindService(serviceConnection);
+            boundedServiceStatus = Constants.SERVICE_STATUS_UNBOUND;
+        }
+        super.onStop();
+    }
+
+    // create a ServiceConnection object
+    // override methods onServiceConnected() and onServiceDisconnected()
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            BoundedService.BoundedServiceBinder binder = (BoundedService.BoundedServiceBinder)service;
+            boundedService = binder.getService();
+            boundedServiceStatus = Constants.SERVICE_STATUS_BOUND;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            boundedService = null;
+            boundedServiceStatus = Constants.SERVICE_STATUS_UNBOUND;
+        }
+    };
+}
+
+
+//CONSTANTS
+
+public interface Constants {
+
+    final public static int buttonIds[] = {
+            R.id.number_0_button,
+            R.id.number_1_button,
+            R.id.number_2_button,
+            R.id.number_3_button,
+            R.id.number_4_button,
+            R.id.number_5_button,
+            R.id.number_6_button,
+            R.id.number_7_button,
+            R.id.number_8_button,
+            R.id.number_9_button,
+            R.id.star_button,
+            R.id.pound_button
+    };
+    final public static int PERMISSION_REQUEST_CALL_PHONE = 1;
+    final public static int CONTACTS_MANAGER_REQUEST_CODE = 2017;
+}
+
